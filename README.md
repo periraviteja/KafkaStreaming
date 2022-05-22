@@ -73,16 +73,57 @@ In applications where accuracy is not paramount, which is true for most web scal
 
 8 - Key Metrics for monitoring Kafka:
 Kafka metrics can be broken down into three categories:
-- Kafka server(broker) metrics - https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/#broker-metrics
-- Producer metrics - https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/#kafka-producer-metrics
-- Consumer metrics - https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/#kafka-consumer-metrics
+- Kafka server(broker) metrics -
+- Producer metrics 
+- Consumer metrics 
+
+Broker Metrics:
+All messages must pass through a Kafka broker in order to be consumed, monitoring and alerting on issues as they emerge in broker cluster. 
+They can be broken into three metrics:
+- Kafka emitted metrics
+	- Some metrics to watch are 
+		- UnderReplicatedPartitions, IsrShrinksPerSec/IsrExpandsPerSec , ActiveControllerCount, OfflinePartitionsCount(controller only), LeaderElectionRateAndTimeMs, UncleanLeaderElectionsPerSec, TotalTimeMs, PurgatorySize, BytesInPerSec/BytesOutPerSec, RequestsPerSec
+- Host-level metrics
+	- Some Metrics to watch are
+		- Page cache read ratio, Disk usage, CPU usage, Network bytes sent/received
+- JVM garbage collection metrics
+	- Some metrics to watch are
+		- Young generation garbage collection time, Old generation garbage collection count/time
+
+
+Kafka Producer Metrics:
+Some Metrics to watch are:
+	- Compression rate, response rate, request rate, request latency average, Outgoing byte rate, I/O wait time, Batch size
+
+Consumer Metrics:
+	- Some metrics to watch are:
+		- Records lag/ Records lag max, bytes consumed rate, records consumed rate, fetch rate
+
+Why ZooKeeper?
+It plays important role in Kafka deployments, which is responsible for maintaining information about brokers and topics, applying quotas to govern the rate of traffic moving through your deployment, and storing information about replicas so Kafka can elect partition leaders as state of deployment changes.
+To run a reliable kafka cluster, one should deploy Zookeeper in a high-availability configuration called ensemble.
+
+ZooKeeper Metrics:
+	 -  Some metrics to watch are:
+		- Outstanding requests, average latency, number of alive connections , Followers(leader only), Pending syncs (leaders only), Open file descriptor count
+
+Zookeeper system metrics:
+	 - Some metrics to watch for:
+		- Bytes sent/ received, Usable memory, Swap usage, Disk latency
+
 As Kafka relies on Zookeeper to maintain state, its important to monitor zookeeper.
 
 9 - Scalability:
 - For scalability, define kafka nodes which would read from one or more topics and generate unique users count accordingly.
 
 10 -  Edges cases, options and other things:
-https://github.com/svetaj/KAFKA_CARDINALITY/blob/master/doc/data_engineer_work.pdf
+There can be several estimator records containing same timestamp and range.
+- Query from application reads all records that match given criteria and performs estimator addition to produce resulting cardinality estimation.
+- To minimize error, resulting cardinality should be less than expected cardinality( provided as input param)
+- Any batch processing produces same way separate estimator records with appropriate time stamps and range according to configured granularity.
+- Scalability is achieved same way:
+- Separate kafka nodes read from one or more kafka topic and produce estimator records in proposed manner. 
+Link: http://highscalability.com/blog/2019/2/27/give-meaning-to-100-billion-events-a-day-the-shift-to-redshi.html
 
 Bonus: 
 
