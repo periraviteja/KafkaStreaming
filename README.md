@@ -150,7 +150,7 @@ Link: https://www.confluent.io/resources/recommendations-developers-using-conflu
 Other ways to count the messages:
 In slack forum: http://cnfl.io/slack, below thread i find it interesting.
 '''
-Srinivas Devaki: You can use GetOffsetShell to get the earliest and latest offsets and compute the number of messages by subtracting with each other
+One can use GetOffsetShell to get the earliest and latest offsets and compute the number of messages by subtracting with each other
 
 # Get Latest Offset
 /opt/kafka/bin/kafka-run-class.sh kafka.tools.GetOffsetShell \
@@ -163,15 +163,6 @@ Srinivas Devaki: You can use GetOffsetShell to get the earliest and latest offse
     --topic my_topic \
     --time -2
 
-Mitch Henderson: Small note, offsets are very much not guaranteed to be sequential. Not every offset will be a record the client will receive. 
-The above will give you a round about estimate of the number of messages, not it will not be exact. The only way to get an exact number is to dump the topic and pipe it to wc
-
-Srinivas: awesome detail, never knew that offsets are not guaranteed to be sequential. 
-But why is that so? I’ve tried searching about this but couldn’t find any references, any link where I can read more on this?
-
-Mitch: Idempotent and transactional production are the most common reasons. But there are others.
-
-Weeco: Also because of gaps in compacted topics this won’t work If you don’t want to consume all messages to count the number of records I have just one idea how to get a rough estimate. I described that here: https://github.com/cloudhut/kowl/issues/83
 '''
 
 Scalability: Below doc is good:
