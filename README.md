@@ -1,49 +1,68 @@
 # KafkaStreaming
+
+Task Description:
+The initial prototype should provide unique user IDs per minute, from the ingested data described bellow:
+
+The test data consists of (Log)-Frames of JSON data;
+ts - timestamp (unixtime);
+uid - user id;
+Display results as soon as possible;
+
+The following items should be provided:
+READme document explaining the thought process;
+instructions to build/run;
+reasoning behind the key points;
+metrics.
+
+To run in os/linux, .sh command run replacing the \bin\windows\*.bat command which works in windows.
+
+- To access historical data, one of the two ways is via spark providing the docs to process in batch.
+- But Storing historical data in kafka clusters will become expensive as kafka stores multiple copies of each message on hard drives connected to servers. 
+- This can lead to risk in production environments resulting low performance.
+- Given the significant technical hurdles inherent in reading data directly from Kafka, using a data lake to store raw events makes sense.  
+- To manage this raw Kafka data and make it useful, establish an ETL pipeline to extract the data from Kafka or a staging environment, transform it into structured data, and then load it into the database or analytics tool of choice
+
+Prerequisites:
+	- Install JDM/JRE
+
+Install below libraries:
+	- kafka-python
+	- cython
+	- pdsa
+
 Project Setup:
 
-1 - Install Kafka to start zookeeper and kafka
-  - docker-compose up -d
-2 - Create a Topic:
-  - docker exec -it kafka /bin/sh
-  - /opt/kafka/bin/kafka-topics.sh --create --zookeeper zookeeper:2181 --replication-factor 1 --partitions 1 --topic kafka_distinct_counter
-Let's export environment variables from .env file
-  - export $(cat .env | grep -v ^# | xargs)
+Project Setup:
 
-3 - Lets send test data to kafka topic using kafka producer
-  - To copy data from host to docker container
-	- docker cp data/stream.jsonl kafka:/stream.jsonl
-  - To run the following command inside container
-	- cat stream.jsonl | opt/kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic kafka_distinct_counter
+1- Start Zookeeper
+Zookeeper server:
+.\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties
 
-  - Alternatively run below command(outside the container)
-	- gunzip data/stream.jsonl.gz
-	- python src/kafka/producer.py
+2 - Start Kafka
+Kafka server:
+.\bin\windows\kafka-server-start.bat .\config\server.properties
 
-4 - A small to read the data from kafka and prints it to stdout
-	- python src/kafka/consumer.py
+3 - List Topics
+.\bin\windows\kafka-topics.bat --list --bootstrap-server localhost:9092
 
-5 - To count distinct items in kafka stream, Faust is used which is stream processing library
-	- Run below command to start Faust
-	- cd src/distinct_counter
-	- faust -A users worker -l info
-	- Open another terminal lets publish data using producer
-	- python src/kafka/producer.py
+4 - Topic Creation
+.\bin\windows\kafka-topics.bat --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic distinct_nummer2
 
-	- In another terminal, run the consumer and check the topic to which faust worker writes the output
-	- opt/kafka/bin/kafka-console-consumer.sh --from-beginning --bootstrap-server kafka:9092 --topic=users-unique-changelog
+5 - To confirm the running topic
+.\bin\windows\kafka-topics.bat --list --bootstrap-server localhost:9092
 
-	- To list all available topics in our Kafka instance, we can use:
+6 - Easy way to pass the test data to console producer :
+.\bin\windows\kafka-console-producer.bat --broker-list localhost:9092 --topic distinct_nummer2 < stream.jsonl
 
-	- $KAFKA_HOME/bin/kafka-topics.sh --bootstrap-server kafka:9092 --list
-	- To test that all is working correctly, to send some messages.
-	- Start a producer on topic test:
-	- $KAFKA_HOME/bin/kafka-console-producer.sh --broker-list kafka:9092 --topic=test
+7 - Stopping kafka
+ps ax | grep -i 'kafka.Kafka' | grep -v grep | awk '{print $1}' | xargs kill -9
 
+=========================================================
 
-6 - Shut down and clean up
-Stop the consumer/producer with Ctrl + C
-Shut down the kafka broker system
-	- docker compose down
+Useful links:
+- https://spark.apache.org/docs/2.2.0/structured-streaming-kafka-integration.html
+- http://activisiongamescience.github.io/2016/06/15/Kafka-Client-Benchmarking/
+- https://buildmedia.readthedocs.org/media/pdf/pdsa/stable/pdsa.pdf
 
 KAFKA Streaming:
 They are 4 main kafka concepts:
